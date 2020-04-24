@@ -1,0 +1,75 @@
+class Task {
+    constructor (id, title, desc) {
+        this.id = id;
+        this.title = title;
+        this.desc = desc;
+        this.status = 1;
+        // Если дата не задана явно, то используются текущие дата и время сервера
+        // new Date() без аргументов примет значение текущих даты/времени
+        // this.datetime = datetime || new Date();
+    }
+
+    toJson () {
+        return {
+            id: this.id,
+            title: this.title,
+            desc: this.desc,
+            status: this.status,
+            // Объект даты сериализуем в строку
+            // datetime: this.datetime.toUTCString()
+        };
+    }
+}
+
+class TaskList {
+    constructor (id, title, desc) {
+    	this.id = id;
+    	this.title = title;
+    	this.desc = desc;
+        // В отличие от чат-комнат, сообщения хранятся в массиве, а не в словаре,
+        // так как не стоит задачи получения сообщения по его id
+        this.tasks = [];
+        // По аналогии с ChatRoomManager - счетчик хранит id следующего объекта
+        this._nextTaskId = 0;
+    }
+
+    addNewTask (title, desc) {
+        let task = new Task(this._nextTaskId++, title, desc);
+        this.tasks.push(task);
+        return task;
+    }
+
+    toJson () {
+        // Приведем объект к тому JSON-представлению, которое отдается клиенту
+        return {
+            id: this.id,
+            title: this.title
+        };
+    }
+}
+
+class Project {
+    constructor (title, desc) {
+        this.title = title;
+        this.desc = desc;
+        this.taskLists = {};
+        // Счетчик, который хранит id, который будет присвоен следующей комнате
+        this._nextTaskListId = 0;
+    }
+
+    createNewTaskList (title, desc) {
+        // Создаем объект новой комнаты
+        let tasklist = new TaskList(this._nextTaskListId++, title, desc);
+        // Заносим его в словарь
+        this.taskLists[tasklist.id] = tasklist;
+        return tasklist;
+    }
+
+    getById (id) {
+        return this.taskLists[id];
+    }
+}
+
+
+// Определим объекты, которые будут экспортироваться модулем как внешнее API:
+module.exports = { Task, TaskList, Project };
