@@ -59,7 +59,11 @@
 
     <v-footer app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <span>&copy; 2019</span>
+      <div class="ml-auto mr-2">
+        Made with <v-icon color="red">
+          mdi-heart
+        </v-icon> in 2020
+      </div>
     </v-footer>
   </v-app>
 </template>
