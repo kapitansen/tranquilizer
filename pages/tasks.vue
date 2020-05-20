@@ -1,18 +1,38 @@
 <template>
-  <v-container v-shortkey="{new: ['alt', 'n'], more: ['alt', 'shift', 'n'], submit: ['alt', 'enter']}" class="mt-4" @shortkey="shortkeys">
+  <v-container v-shortkey="{new: ['ctrl', 'n'], more: ['ctrl', 'shift', 'n'], submit: ['ctrl', 'enter'], search: ['ctrl', 's']}" class="mt-4" @shortkey="shortkeys">
     <v-row>
       <v-col cols="6">
         <v-card>
-          <v-toolbar color="blue" dark>
-            <v-toolbar-title>Planned Tasks ({{ undoneTasks.length }})</v-toolbar-title>
-            <v-spacer />
-            <v-tooltip top>
+          <v-toolbar color="blue">
+            <v-toolbar-title v-if="!searchMode">
+              Planned Tasks ({{ undoneTasks.length }})
+            </v-toolbar-title>
+            <v-text-field
+              v-if="searchMode"
+              v-model="searchKey"
+              class="searchTask"
+              dense
+              placeholder="Enter full or part task name"
+              outlined
+              :autofocus="searchTask"
+              background-color="#272727"
+              clearable
+              @click:clear="resetSearch"
+              @keydown.esc="resetSearch"
+              @keydown.enter="searchTask(searchKey)"
+            />
+            <v-spacer v-if="!searchMode" />
+            <v-tooltip v-if="!searchMode" top>
               <template v-slot:activator="{ on }">
-                <v-btn icon v-on="on">
+                <v-btn
+                  icon
+                  v-on="on"
+                  @click="searchMode=!searchMode"
+                >
                   <v-icon>mdi-magnify</v-icon>
                 </v-btn>
               </template>
-              <span>Search task by name (Alt+S)</span>
+              <span>Search task by name (Ctrl+S)</span>
             </v-tooltip>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
@@ -30,7 +50,7 @@
 
           <v-list two-line>
             <v-list-item-group multiple active-class="light--text">
-              <template v-for="(item, index) in tasks">
+              <template v-for="(item, index) in localTasks">
                 <v-list-item :key="item.id">
                   <template v-slot:default="{ active }">
                     <v-list-item-content>
@@ -52,7 +72,7 @@
                   </template>
                 </v-list-item>
 
-                <v-divider v-if="index + 1 < tasks.length" :key="'divider'+index" />
+                <v-divider v-if="index + 1 < localTasks.length" :key="'divider'+index" />
               </template>
             </v-list-item-group>
           </v-list>
@@ -78,7 +98,7 @@
                   {{ addingNewTaskMore ? "mdi-archive-arrow-up-outline" : "mdi-archive-arrow-down-outline" }}
                 </v-icon>
               </template>
-              <span>Advanced options (Alt+Shift+N)</span>
+              <span>Advanced options (Ctrl+Shift+N)</span>
             </v-tooltip>
           </v-text-field>
           <v-card v-if="addingNewTaskMore" outlined>
@@ -134,19 +154,18 @@ export default {
   data: () => ({
     addingNewTask: false,
     addingNewTaskMore: false,
+    searchMode: false,
+    searchKey: '',
     newTask: {}
   }),
   computed: {
-    tasks () {
+    localTasks () {
       return this.$store.state.tasks
     },
     users () {
       return this.$store.state.users
     },
-    // taskTpl () {
-    //   return this.$store.state.taskTpl
-    // },
-    ...mapGetters(['doneTasks', 'undoneTasks'])
+    ...mapGetters(['doneTasks', 'undoneTasks', 'filterTasksByName'])
   },
   watch: {
     addingNewTaskMore (val) {
@@ -157,10 +176,20 @@ export default {
     }
   },
   methods: {
+    resetSearch () {
+      this.searchMode = false
+      this.searchKey = ''
+    },
+    searchTask (searchKey) {
+      this.localTasks = filterTasksByName(searchKey)
+    },
     shortkeys (event) {
       switch (event.srcKey) {
         case 'new':
           this.addingNewTask = true
+          break
+        case 'search':
+          this.searchMode = true
           break
         case 'more':
           this.addingNewTaskMore = true

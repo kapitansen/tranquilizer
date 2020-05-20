@@ -2,7 +2,7 @@
   <v-app id="inspire">
     <v-navigation-drawer v-model="drawer" app clipped expand-on-hover>
       <v-list dense>
-        <v-list-item link nuxt to="/dashboard">
+        <v-list-item v-if="settings.dashboardOn" link nuxt to="/dashboard">
           <v-list-item-action>
             <v-icon>mdi-book-open-outline</v-icon>
           </v-list-item-action>
@@ -10,7 +10,7 @@
             <v-list-item-title>Dashboard</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link nuxt to="/projects">
+        <v-list-item v-if="settings.projectsOn" link nuxt to="/projects">
           <v-list-item-action>
             <v-icon>mdi-clipboard-text</v-icon>
           </v-list-item-action>
@@ -72,22 +72,23 @@
 import Logo from '~/components/Logo.vue'
 
 export default {
-  // props: {
-  //   source: String,
-  // },
   components: {
     Logo
   },
   data: () => ({
     drawer: null
   }),
+  computed: {
+    settings () {
+      return this.$store.state.settings
+    }
+  },
+  watch: {
+    settings () { this.$vuetify.theme.dark = this.settings.themeDark }
+  },
   created () {
-    this.$vuetify.theme.dark = true
+    this.$vuetify.theme.dark = this.settings.themeDark
   }
 }
 
 </script>
-
-<style>
-
-</style>

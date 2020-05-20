@@ -7,6 +7,11 @@ const debug = process.env.NODE_ENV !== 'production'
 
 const store = () => new Vuex.Store({
   state: {
+    settings: {
+      themeDark: true,
+      projectsOn: false,
+      dashboardOn: false
+    },
     nextTaskID: 4,
     users: [
       {
@@ -57,6 +62,9 @@ const store = () => new Vuex.Store({
       return state.tasks.filter((task) => {
         return !task.done
       })
+    },
+    filterTasksByName: (state, name) => {
+      return state.tasks.filter(task => task.title.includes(name))
     }
   },
   mutations: {
@@ -79,6 +87,12 @@ const store = () => new Vuex.Store({
         id: state.nextTaskID++,
         ...newTask
       })
+    },
+    changeSettings: (state, newSettings) => {
+      state.settings = newSettings
+    },
+    changeSetting1: (state, newSetting1) => {
+      state.setting1 = newSetting1
     }
   },
   actions: {
